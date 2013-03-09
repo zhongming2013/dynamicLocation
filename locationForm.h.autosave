@@ -1,0 +1,22 @@
+#ifndef LOCATIONFORM_H
+#define LOCATIONFORM_H
+
+#include <QDialog>
+#include <QSqlTableModel>
+#include <QTableView>
+
+class LocationRecordForm : public QDialog
+{
+    Q_OBJECT
+
+public:
+    LocationRecordForm(QWidget *parent);
+    ~LocationRecordForm();
+
+private:
+    QSqlTableModel *locationRecordModel;
+    QTableView *locationRecordView;
+};
+
+
+#endif // LOCATIONFORM_H
