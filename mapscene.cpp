@@ -16,7 +16,7 @@ MapScene::MapScene(QObject *parent)
     : QGraphicsScene(parent)
 {
     setSceneRect(0, 0, 1200, 895);//场景大小
-    setBackgroundBrush(Qt::lightGray);
+    setBackgroundBrush(Qt::white);
 }
 
 void MapScene::addRefNode()
@@ -62,10 +62,11 @@ void MapScene::deleteRefNode()
         floor = roomId/100;
         number = roomId%100;
         QSqlQuery query;
-        query.prepare("DELETE FROM room WHERE floor=? AND number=?");
+        query.prepare("DELETE FROM referNode WHERE floor=? AND number=?");
         query.addBindValue(floor);
         query.addBindValue(number);
         query.exec();
+        this->referenceNodeMap.remove(roomId);
         i++;
     }
     qDeleteAll(items);
@@ -183,7 +184,7 @@ void MapScene::doTemperatureMsg(const QVector<int> msg)
     if(this->temperatureNodeMap.contains(roomId))
     {//更新显示温度
         QGraphicsTextItem * tn = this->temperatureNodeMap.value(roomId);
-        tn->setPlainText(QString("%1`C").arg(t));
+        tn->setPlainText(QString("温度:%1`C").arg(t));
     }
     else
     {//添加温度节点
@@ -206,7 +207,7 @@ void MapScene::addMobileNode(int fixId, QPointF position)
 //创建温度节点，并添加到scene和添加到scene的temperatureNodeMap
 void MapScene::addTemperatureNode(int floor,int number, int t)
 {
-    QGraphicsTextItem *temp = new QGraphicsTextItem(QString("%1`C").arg(t));
+    QGraphicsTextItem *temp = new QGraphicsTextItem(QString("温度:%1`C").arg(t));
     QSqlQuery q;
     int x,y;
     q.exec(QString("SELECT x,y FROM room WHERE floor=%1 AND number=%2").arg(floor).arg(number));

@@ -39,14 +39,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(scene, SIGNAL(refreshEmployeeTableWidget(const int)),
             personalTableWidget, SLOT(updateTable(const int)));
-    connect(showRefNodeAct, SIGNAL(triggered()), view, SLOT(sceneShowReferNode()));
+    connect(toggleRefNodeAct, SIGNAL(triggered()), view, SLOT(sceneShowReferNode()));
     connect(addRefNodeAct, SIGNAL(triggered()), view, SLOT(sceneAddReferNode()));
     connect(deleteRefNodeAct, SIGNAL(triggered()), view, SLOT(sceneDeleteReferNode()));
 
     setCentralWidget(view);
     setMinimumSize(1000,550);
     setWindowIcon(QIcon(":/images/icon.jpg"));
-    setWindowTitle(tr("Dynamic Location"));
+    setWindowTitle(tr("IB Location"));
 }
 
 MainWindow::~MainWindow()
@@ -56,8 +56,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::createActions()
 {
-    switchScene = new QAction(tr("Switch Scene"),this);
-    switchScene->setStatusTip(tr("Switch to another scene"));
+    switchScene = new QAction(tr("Switch Floor"),this);
+    switchScene->setStatusTip(tr("Switch to another floor scene"));
     connect(switchScene, SIGNAL(triggered()), view, SLOT(switchScenes()));
 
     exitAct = new QAction(tr("Exit"),this);
@@ -68,11 +68,11 @@ void MainWindow::createActions()
     addRefNodeAct->setToolTip(tr("Add Reference"));
     addRefNodeAct->setStatusTip(tr("Add reference node"));
     deleteRefNodeAct = new QAction(tr("Delete Ref"), this);
-    deleteRefNodeAct->setToolTip(tr("Delete Reference"));
+    deleteRefNodeAct->setToolTip(tr("Delete Reference Node"));
     deleteRefNodeAct->setStatusTip(tr("Delete reference Node"));
-    showRefNodeAct = new QAction(tr("Show RefNode"),this);
-    showRefNodeAct->setToolTip(tr("Show Reference"));
-    showRefNodeAct->setStatusTip(tr("Show reference node"));
+    toggleRefNodeAct = new QAction(tr("Toggle Ref"),this);
+    toggleRefNodeAct->setToolTip(tr("Toggle Show All Reference Node"));
+    toggleRefNodeAct->setStatusTip(tr("Toggle Show All Reference Node"));
 
     openComAct = new QAction(tr("Open COM..."),this);
     openComAct->setStatusTip(tr("Config and open the serial port"));
@@ -97,7 +97,6 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(switchScene);
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -106,7 +105,8 @@ void MainWindow::createMenus()
     editMenu->addSeparator();
     editMenu->addAction(addRefNodeAct);
     editMenu->addAction(deleteRefNodeAct);
-    editMenu->addAction(showRefNodeAct);
+    editMenu->addAction(toggleRefNodeAct);
+    editMenu->addAction(switchScene);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
 
@@ -131,7 +131,8 @@ void MainWindow::createToolBars()
     openCOMToolBar->addSeparator();
     openCOMToolBar->addAction(addRefNodeAct);
     openCOMToolBar->addAction(deleteRefNodeAct);
-    openCOMToolBar->addAction(showRefNodeAct);
+    openCOMToolBar->addAction(toggleRefNodeAct);
+    openCOMToolBar->addAction(switchScene);
 }
 
 void MainWindow::createDockWidgets()

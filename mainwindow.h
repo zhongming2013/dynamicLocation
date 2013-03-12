@@ -69,7 +69,7 @@ private:
     QAction *deleteRefNodeAct;//É¾³ý²Î¿¼½Úµã
     QAction *openComAct;
     QAction *closeComAct;
-    QAction *showRefNodeAct;
+    QAction *toggleRefNodeAct;
     QAction *findEmployeeAct;
     QAction *findLocationAct;
     QAction *aboutAct;
