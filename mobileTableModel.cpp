@@ -7,7 +7,7 @@
 MobileTableModel::MobileTableModel(QObject *parent)
 {
     setTable("mobileConfig");
-    setSort(2, Qt::AscendingOrder);
+    setSort(1, Qt::AscendingOrder);
     setHeaderData(1, Qt::Horizontal, tr("FixID"));
     setHeaderData(2, Qt::Horizontal, tr("Mode"));
     setHeaderData(3, Qt::Horizontal, tr("DST Address"));

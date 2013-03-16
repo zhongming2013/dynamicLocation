@@ -8,10 +8,12 @@ LocationRecordForm::LocationRecordForm(QWidget *parent)
 {
     locationRecordModel = new QSqlTableModel(this);
     locationRecordModel->setTable("location");
-    locationRecordModel->setHeaderData(1, Qt::Horizontal, tr("NetID"));
-    locationRecordModel->setHeaderData(2, Qt::Horizontal, tr("Room"));
-    locationRecordModel->setHeaderData(3, Qt::Horizontal, tr("Help"));
-    locationRecordModel->setHeaderData(4, Qt::Horizontal, tr("DateTime"));
+    locationRecordModel->setHeaderData(1, Qt::Horizontal, tr("FixID"));
+    locationRecordModel->setHeaderData(2, Qt::Horizontal, tr("NetID"));
+    locationRecordModel->setHeaderData(3, Qt::Horizontal, tr("Floor"));
+    locationRecordModel->setHeaderData(4, Qt::Horizontal, tr("Number"));
+    locationRecordModel->setHeaderData(5, Qt::Horizontal, tr("Help"));
+    locationRecordModel->setHeaderData(6, Qt::Horizontal, tr("DateTime"));
     locationRecordModel->select();
     locationRecordView = new QTableView;
     locationRecordView->setModel(locationRecordModel);
@@ -19,17 +21,20 @@ LocationRecordForm::LocationRecordForm(QWidget *parent)
     locationRecordView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     nameLabel = new QLabel(tr("Name:"));
-    roomLabel = new QLabel(tr("Room:"));
+    floorLabel = new QLabel(tr("Floor:"));
+    numberLabel = new QLabel(tr("Number:"));
     helpLabel = new QLabel(tr("Help:"));
     dateLabel = new QLabel(tr("Date:"));
     nameEdit = new QLineEdit;
-    roomEdit = new QLineEdit;
+    floorEdit = new QLineEdit;
+    numberEdit = new QLineEdit;
     helpEdit = new QComboBox;
     helpEdit->addItem(tr("Normal"));
     helpEdit->addItem(tr("Need Help"));
     dateEdit = new QDateEdit;
     nameLabel->setBuddy(nameEdit);
-    roomLabel->setBuddy(roomEdit);
+    floorLabel->setBuddy(floorEdit);
+    numberLabel->setBuddy(numberEdit);
     helpLabel->setBuddy(helpEdit);
     dateLabel->setBuddy(dateEdit);
     dateEdit->setCalendarPopup(true);
@@ -48,8 +53,10 @@ LocationRecordForm::LocationRecordForm(QWidget *parent)
     QHBoxLayout *firstHLayout = new QHBoxLayout;
     firstHLayout->addWidget(nameLabel);
     firstHLayout->addWidget(nameEdit);
-    firstHLayout->addWidget(roomLabel);
-    firstHLayout->addWidget(roomEdit);
+    firstHLayout->addWidget(floorLabel);
+    firstHLayout->addWidget(floorEdit);
+    firstHLayout->addWidget(numberLabel);
+    firstHLayout->addWidget(numberEdit);
     QHBoxLayout *secondHLayout = new QHBoxLayout;
     secondHLayout->addWidget(helpLabel);
     secondHLayout->addWidget(helpEdit);
@@ -81,19 +88,22 @@ LocationRecordForm::~LocationRecordForm()
 
 void LocationRecordForm::find()
 {
-    QString netId = nameEdit->text();
-    QString roomId = roomEdit->text();
+    QString fixId = nameEdit->text();
+    QString floor = floorEdit->text();
+    QString number = numberEdit->text();
     QString help = (helpEdit->currentText() == "Normal")?
                         QString::number(0):QString::number(1);
     QString date = dateEdit->date().toString("yyyy-MM-dd");
 
     QString condition = "help = " + help;
-    if(!netId.isEmpty())
-        condition.append(" and netId = " + netId);
-    if(!roomId.isEmpty())
-        condition.append(" and roomId = " + roomId);
+    if(!fixId.isEmpty())
+        condition.append(" and fixId = " + fixId);
+    if(!floor.isEmpty())
+        condition.append(" and floor = " + floor);
+    if(!number.isEmpty())
+        condition.append("and number = " + number);
     if(!date.isEmpty())
-        condition.append(" and timeRecord like '" + date + "%'");
+        condition.append(" and time like '" + date + "%'");
     locationRecordModel->setFilter(condition);
     locationRecordModel->select();
 }

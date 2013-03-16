@@ -71,7 +71,7 @@ void ReferenceNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         else//没有则添加到参考节点数据表和room数据表
         {
             QSqlQuery q;
-            q.exec(QString("INSERT INTO referNode (netId,floor,number,temperature) values('0',%1,%2,20)").arg(floor).arg(number));
+            q.exec(QString("INSERT INTO referNode (netId,floor,number,tempPeriod) values('0',%1,%2,30)").arg(floor).arg(number));
             query.prepare("INSERT INTO room (floor,number,x,y) values(?,?,?,?)");
         }
         query.addBindValue(floor);

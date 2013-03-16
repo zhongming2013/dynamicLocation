@@ -28,11 +28,13 @@ private:
     QTableView *locationRecordView;
 
     QLabel *nameLabel;
-    QLabel *roomLabel;
+    QLabel *floorLabel;
+    QLabel *numberLabel;
     QLabel *helpLabel;
     QLabel *dateLabel;
     QLineEdit *nameEdit;
-    QLineEdit *roomEdit;
+    QLineEdit *floorEdit;
+    QLineEdit *numberEdit;
     QComboBox *helpEdit;
     QDateEdit *dateEdit;
     QGroupBox *conditionGroup;

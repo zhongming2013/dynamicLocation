@@ -23,11 +23,11 @@ private slots:
 private:
     QAction *sendMsgAct;
 
-    QLineEdit *netIdEdit;
+    QLineEdit *fixIdEdit;
     QLineEdit *modeEdit;
     QLineEdit *dstAddrEdit;
     QLineEdit *periodEdit;
-    int selfAddr;
+    QString selfAddr;
 };
 
 #endif // MOBILETABLEVIEW_H

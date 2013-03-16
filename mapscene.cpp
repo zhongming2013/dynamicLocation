@@ -130,52 +130,54 @@ void MapScene::doMobileMsg(const QVector<int> msg)
     fixId = msg.at(M_FIXID);
     help = msg.at(M_HELP);
     netId = QString::number((msg.at(M_NETID_HI)<<8)+msg.at(M_NETID_LO),16);
-
-    //查询数据库获取坐标
-    QSqlQuery query;
-    query.exec(QString("SELECT x,y FROM room WHERE floor=%1 AND number=%2").arg(roomFloor).arg(roomNumber));
-    query.next();
-    int x,y;
-    x = query.value(0).toInt() + (std::rand() % 20 - 10);//半径为10像素的范围
-    y = query.value(1).toInt() + (std::rand() % 20 - 10);
-
-    //向数据库添加定位记录
-    query.prepare("INSERT INTO location"
-                  "(fixId,netId,floor,number,help,timeRecord)"
-                  "VALUES(?,?,?,?,?,current_timestamp)");
-    query.addBindValue(fixId);
-    query.addBindValue(netId);
-    query.addBindValue(roomFloor);
-    query.addBindValue(roomNumber);
-    query.addBindValue(help);
-    query.exec();
-    //节点已经存在
-    if(this->mobileNodeMap.contains(fixId))
+    //数据合法才显示
+    if(roomFloor && roomNumber)
     {
-        MobileNode *mn = dynamic_cast<MobileNode *>(*(this->mobileNodeMap.find(fixId)));
-        mn->setHelp(help);
-        if(help)
+        //查询数据库获取坐标
+        QSqlQuery query;
+        query.exec(QString("SELECT x,y FROM room WHERE floor=%1 AND number=%2").arg(roomFloor).arg(roomNumber));
+        query.next();
+        int x,y;
+        x = query.value(0).toInt() + (std::rand() % 20 - 10);//半径为10像素的范围
+        y = query.value(1).toInt() + (std::rand() % 20 - 10);
+
+        //向数据库添加定位记录
+        query.prepare("INSERT INTO location"
+                      "(fixId,netId,floor,number,help)"
+                      "VALUES(?,?,?,?,?)");
+        query.addBindValue(fixId);
+        query.addBindValue(netId);
+        query.addBindValue(roomFloor);
+        query.addBindValue(roomNumber);
+        query.addBindValue(help);
+        query.exec();
+        //节点已经存在
+        if(this->mobileNodeMap.contains(fixId))
         {
-            query.prepare("SELECT name FROM employee WHERE fixId = ?");
-            query.addBindValue(fixId);
-            query.exec();
-            query.next();
-            QMessageBox msgBox;
-            msgBox.setText(query.value(0).toString()+" needs HELP!!!\n"
-                           "He/Her is in " + QString::number(roomFloor*100+roomNumber));
-            msgBox.exec();
+            MobileNode *mn = dynamic_cast<MobileNode *>(*(this->mobileNodeMap.find(fixId)));
+            mn->setHelp(help);
+            if(help)
+            {
+                query.prepare("SELECT name FROM employee WHERE fixId = ?");
+                query.addBindValue(fixId);
+                query.exec();
+                query.next();
+                QMessageBox msgBox;
+                msgBox.setText(query.value(0).toString()+" needs HELP!!!\n"
+                               "He/Her is in " + QString::number(roomFloor*100+roomNumber));
+                msgBox.exec();
+            }
+            moveMobileNode(mn,QPointF(x,y));
         }
-        moveMobileNode(mn,QPointF(x,y));
-    }
-    else
-    {
-        addMobileNode(fixId,QPointF(x,y));
+        else
+        {
+            addMobileNode(fixId,QPointF(x,y));
+        }
     }
 }
 
 void MapScene::doTemperatureMsg(const QVector<int> msg)
 {
-    //TODO:保存温度到数据库，更新scene中的温度节点
     int floor,number,t,roomId;
     floor = msg.at(RT_ROOM_FLOOR);
     number = msg.at(RT_ROOM_NUMBER);
@@ -184,12 +186,19 @@ void MapScene::doTemperatureMsg(const QVector<int> msg)
     if(this->temperatureNodeMap.contains(roomId))
     {//更新显示温度
         QGraphicsTextItem * tn = this->temperatureNodeMap.value(roomId);
-        tn->setPlainText(QString("温度:%1`C").arg(t));
+        tn->setPlainText(QString("%1`C").arg(t));
     }
     else
     {//添加温度节点
         addTemperatureNode(floor, number, t);
     }
+    QSqlQuery q;//温度数据记录到数据
+    q.prepare("INSERT INTO temperature (floor,number,temperature)"
+              "VALUES (?,?,?)");
+    q.addBindValue(floor);
+    q.addBindValue(number);
+    q.addBindValue(t);
+    q.exec();
 }
 
 void MapScene::addMobileNode(int fixId, QPointF position)
@@ -207,7 +216,7 @@ void MapScene::addMobileNode(int fixId, QPointF position)
 //创建温度节点，并添加到scene和添加到scene的temperatureNodeMap
 void MapScene::addTemperatureNode(int floor,int number, int t)
 {
-    QGraphicsTextItem *temp = new QGraphicsTextItem(QString("温度:%1`C").arg(t));
+    QGraphicsTextItem *temp = new QGraphicsTextItem(QString("%1`C").arg(t));
     QSqlQuery q;
     int x,y;
     q.exec(QString("SELECT x,y FROM room WHERE floor=%1 AND number=%2").arg(floor).arg(number));

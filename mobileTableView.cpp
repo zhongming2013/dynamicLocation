@@ -34,36 +34,35 @@ void MobileTableView::configMsgDialog()
     QModelIndexList indexList = selectedIndexes();
     int r = indexList.first().row();
     QSqlQuery query;
-    query.exec("SELECT * FROM mobileConfig ORDER BY netId");
-    int netId,mode,dstAddr,period;
-    QString dstAddrHex(4, '0');
+    query.exec("SELECT * FROM mobileConfig ORDER BY fixId");
+    int fixId,mode,period;
+    QString dstAddr;
     while(query.next())//获取原来的配置信息
     {
         if(0 == r--)
         {
-            netId = query.value(1).toInt();
+            fixId = query.value(1).toInt();
             mode = query.value(2).toInt();
-            dstAddr = query.value(3).toInt();
+            dstAddr = "0x" + query.value(3).toString();
             period = query.value(4).toInt();
-            selfAddr = query.value(5).toInt();
+            this->selfAddr = query.value(5).toString();
             break;
         }
     }
-    dstAddrHex.append(QString::number(dstAddr, 16).toUpper());
     QDialog *mobileConfigDialog = new QDialog;
-    QLabel *netIdLabel = new QLabel(tr("NetID:"), mobileConfigDialog);
+    QLabel *fixIdLabel = new QLabel(tr("FixID:"), mobileConfigDialog);
     QLabel *modeLabel = new QLabel(tr("Mode:"), mobileConfigDialog);
     QLabel *dstAddrLabel = new QLabel(tr("DST Address:"), mobileConfigDialog);
     QLabel *periodLabel = new QLabel(tr("Period:"), mobileConfigDialog);
-    netIdEdit = new QLineEdit;
-    netIdEdit->setText(QString::number(netId));
+    fixIdEdit = new QLineEdit;
+    fixIdEdit->setText(QString::number(fixId));
     modeEdit = new QLineEdit;
     modeEdit->setText(QString::number(mode));
     dstAddrEdit = new QLineEdit;
-    dstAddrEdit->setText(dstAddrHex.right(4));
+    dstAddrEdit->setText(dstAddr);
     periodEdit = new QLineEdit;
     periodEdit->setText(QString::number(period));
-    netIdLabel->setBuddy(netIdEdit);
+    fixIdLabel->setBuddy(fixIdEdit);
     modeLabel->setBuddy(modeEdit);
     dstAddrLabel->setBuddy(dstAddrEdit);
     periodLabel->setBuddy(periodEdit);
@@ -73,8 +72,8 @@ void MobileTableView::configMsgDialog()
     QPushButton *closeButton = new QPushButton(tr("Close"));
     connect(closeButton, SIGNAL(clicked()), mobileConfigDialog, SLOT(close()));
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(netIdLabel, 0, 0);
-    layout->addWidget(netIdEdit, 0, 1);
+    layout->addWidget(fixIdLabel, 0, 0);
+    layout->addWidget(fixIdEdit, 0, 1);
     layout->addWidget(modeLabel, 1, 0);
     layout->addWidget(modeEdit, 1, 1);
     layout->addWidget(dstAddrLabel, 2, 0);
@@ -92,22 +91,22 @@ void MobileTableView::configMsgDialog()
 void MobileTableView::okToSend()
 {
     bool ok;
-    int newNetId = netIdEdit->text().toInt();
+    int newFixId = fixIdEdit->text().toInt();
     int newMode = modeEdit->text().toInt();
-    int newDstAddr = dstAddrEdit->text().toInt(&ok, 16);
+    QString newDstAddr = dstAddrEdit->text().right(4);//去掉“0x"
     int newPeriod = periodEdit->text().toInt();
 
-    if(newNetId && newPeriod)
+    if(newFixId && newPeriod)
     {
         QByteArray array;
         array.push_back(MOBILE_CFG_MSG & 0xFF);
-        array.push_back(newNetId & 0xFF);
+        array.push_back(newFixId & 0xFF);
         array.push_back(newMode & 0xFF);
-        array.push_back((newDstAddr >> 8) & 0xFF);
-        array.push_back(newDstAddr & 0xFF);
+        array.push_back(newDstAddr.left(2).toInt(&ok, 16));//地址高位
+        array.push_back(newDstAddr.right(2).toInt(&ok, 16));//地址低位
         array.push_back(newPeriod & 0xFF);
-        array.push_back((selfAddr >> 8) & 0xFF);
-        array.push_back(selfAddr & 0xFF);
+        array.push_back(selfAddr.left(2).toInt(&ok, 16));
+        array.push_back(selfAddr.right(2).toInt(&ok, 16));
         emit sendConfigMsg(array);
     }
 }

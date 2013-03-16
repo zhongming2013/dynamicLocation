@@ -334,9 +334,10 @@ void MainWindow::readMyCom()
         case MOBILE_LOC_MSG:
             view->getScene(incomeMsg.at(M_ROOM_FLOOR))->doMobileMsg(incomeMsg);
             break;
-        case REFERENCE_TMP_MSG://此处不用break
+        case REFER_TMP_MSG:
             view->getScene(incomeMsg.at(RT_ROOM_FLOOR))->doTemperatureMsg(incomeMsg);
-        case REFERENCE_CFG_MSG:
+            break;
+        case REFER_CFG_MSG:
             referenceNodeModel->refreshNodeTable(incomeMsg);
             break;
         default:
@@ -351,8 +352,8 @@ void MainWindow::writeMyCom(const QByteArray array)
     int len = 0;
     switch(type)
     {
-    case REFERENCE_CFG_MSG:
-        len = REFERENCE_CFG_MSG_LEN;
+    case REFER_CFG_MSG:
+        len = REFER_CFG_MSG_LEN;
         break;
     case MOBILE_CFG_MSG:
         len = MOBILE_CFG_MSG_LEN;

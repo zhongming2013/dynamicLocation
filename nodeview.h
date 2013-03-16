@@ -19,9 +19,15 @@ signals:
 
 private slots:
     void configMsgDialog();
+    void okToSend();
 
 private:
     QAction *sendMsgAct;
+
+    QLineEdit *floorEdit;
+    QLineEdit *numberEdit;
+    QLineEdit *periodEdit;
+    QString netId;//Ê®Áù½øÖÆ
 };
 
 #endif // NODEVIEW_H
