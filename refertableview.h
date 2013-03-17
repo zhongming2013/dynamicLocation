@@ -1,18 +1,18 @@
-#ifndef NODEVIEW_H
-#define NODEVIEW_H
+#ifndef REFERTABLEVIEW_H
+#define REFERTABLEVIEW_H
 
 #include <QTableView>
 #include <QAction>
 #include <QVariant>
-#include "nodetablemodel.h"
+#include "refertablemodel.h"
 
-class NodeView : public QTableView
+class ReferTableView : public QTableView
 {
     Q_OBJECT
 
 public:
-    NodeView(NodeTableModel *model);
-    ~NodeView();
+    ReferTableView(ReferTableModel *model);
+    ~ReferTableView();
 
 signals:
     void sendConfigMsg(const QByteArray);
@@ -30,4 +30,4 @@ private:
     QString netId;//Ê®Áù½øÖÆ
 };
 
-#endif // NODEVIEW_H
+#endif // REFERTABLEVIEW_H

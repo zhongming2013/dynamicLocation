@@ -10,7 +10,6 @@
 #include <QGraphicsItemAnimation>
 #include <QMessageBox>
 #include <QString>
-#include "room.h"
 
 MapScene::MapScene(QObject *parent)
     : QGraphicsScene(parent)
@@ -164,7 +163,7 @@ void MapScene::doMobileMsg(const QVector<int> msg)
                 query.next();
                 QMessageBox msgBox;
                 msgBox.setText(query.value(0).toString()+" needs HELP!!!\n"
-                               "He/Her is in " + QString::number(roomFloor*100+roomNumber));
+                               "He is in " + QString::number(roomFloor*100+roomNumber));
                 msgBox.exec();
             }
             moveMobileNode(mn,QPointF(x,y));

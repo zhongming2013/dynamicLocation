@@ -17,11 +17,12 @@ class QLineEdit;
 #include "mapview.h"
 #include "mapscene.h"
 #include "node.h"
-#include "nodetablemodel.h"
-#include "nodeview.h"
+#include "refertablemodel.h"
+#include "refertableview.h"
 #include "employeeTableWidget.h"
 #include "mobileTableModel.h"
 #include "mobileTableView.h"
+#include "serialportdialog.h"
 
 class QMenu;
 class QAction;
@@ -37,15 +38,14 @@ public:
 
 private slots:
     void openSerialPortDialog();
-    void openMyCom();
-    void closeMyCom();
-    void readMyCom();
-    void writeMyCom(const QByteArray);
+    void openCom();
+    void closeCom();
+    void readCom();
+    void writeCom(const QByteArray);
 
-    void openFindEmployDialog();
     void findEmployee();
-    void openFindLocationDialog();
     void findLocation();
+    void findTemperature();
 
     void aboutDL();
 
@@ -63,46 +63,34 @@ private:
     QMenu *helpMenu;
     QToolBar *openCOMToolBar;
 
-    QAction *switchScene;
-    QAction *exitAct;
-    QAction *addRefNodeAct;//添加参考节点
-    QAction *deleteRefNodeAct;//删除参考节点
-    QAction *openComAct;
-    QAction *closeComAct;
-    QAction *toggleRefNodeAct;
-    QAction *findEmployeeAct;
-    QAction *findLocationAct;
-    QAction *aboutAct;
+    QAction *switchScene;                        //切换楼层
+    QAction *exitAct;                                   //退出
+    QAction *addRefNodeAct;                 //添加参考节点
+    QAction *deleteRefNodeAct;            //删除参考节点
+    QAction *openComAct;                      //打开串口
+    QAction *closeComAct;                      //关闭串口
+    QAction *toggleRefNodeAct;           //切换显示参考节点
+    QAction *findEmployeeAct;              //查询员工具体信息
+    QAction *findLocationAct;                //查询历史记录
+    QAction *findTemperatureAct;        //查询温度历史记录
+    QAction *aboutAct;                             //关于
 
     MapScene *scene;
     MapView *view;
-    EmployeeTableWidget *personalTableWidget;
-    NodeTableModel *referenceNodeModel;
-    NodeView *referenceNodeView;//显示参考节点信息，包括netID、房间号，温度等
+
+    EmployeeTableWidget *personalTableWidget;//显示员工具体信息
+
+    ReferTableModel *referTableModel;
+    ReferTableView *referTableView;//显示参考节点信息，包括netID、房间号，温度检测周期等
+
     MobileTableModel *mobileTableModel;
     MobileTableView *mobileTableView;//显示移动节点配置信息
-    QTextBrowser *sendTextBrowser;
-    QTextBrowser *receivedTextBrowser;
 
-    Win_QextSerialPort *myCom;
+    QTextBrowser *sendTextBrowser;          //显示通过串口发送的数据记录
+    QTextBrowser *receivedTextBrowser;   //显示通过串口接收的数据记录
 
-    QDialog *serialPortDialog;
-    QComboBox *comComboBox;
-    QComboBox *baudComboBox;
-    QComboBox *dataComboBox;
-    QComboBox *parityComboBox;
-    QComboBox *stopComboBox;
-
-    QDialog *findEmployeeDialog;
-    QLineEdit *findLine;
-    QComboBox *findTypeComboBox;
-
-    QDialog *findLocationDialog;
-    QSqlTableModel *locationRecordTableModel;
-    QTableView *locationRecordTableView;
-    QComboBox *room;
-    QComboBox *time;
-    QLineEdit *name;
+    Win_QextSerialPort *com;                 //串口
+    SerialPortDialog *comDialog;                 //打开串口配置对话框
 };
 
 #endif // MAINWINDOW_H

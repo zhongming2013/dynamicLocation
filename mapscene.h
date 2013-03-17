@@ -4,7 +4,6 @@
 #include <QGraphicsScene>
 //#include <QList>
 #include <QMap>
-#include "room.h"
 #include "mobilenode.h"
 #include "referencenode.h"
 #include <QGraphicsTextItem>

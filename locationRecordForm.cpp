@@ -20,7 +20,7 @@ LocationRecordForm::LocationRecordForm(QWidget *parent)
     locationRecordView->setColumnHidden(0, true);
     locationRecordView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    nameLabel = new QLabel(tr("Name:"));
+    nameLabel = new QLabel(tr("FixId:"));
     floorLabel = new QLabel(tr("Floor:"));
     numberLabel = new QLabel(tr("Number:"));
     helpLabel = new QLabel(tr("Help:"));
@@ -83,7 +83,6 @@ LocationRecordForm::LocationRecordForm(QWidget *parent)
 
 LocationRecordForm::~LocationRecordForm()
 {
-
 }
 
 void LocationRecordForm::find()

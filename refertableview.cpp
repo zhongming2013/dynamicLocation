@@ -1,4 +1,4 @@
-#include "nodeview.h"
+#include "refertableview.h"
 #include "define.h"
 
 #include <QHeaderView>
@@ -10,7 +10,7 @@
 #include <QPushButton>
 #include <QGridLayout>
 
-NodeView::NodeView(NodeTableModel *model) : QTableView()
+ReferTableView::ReferTableView(ReferTableModel *model) : QTableView()
 {
     setModel(model);
     setColumnHidden(0, true);
@@ -24,12 +24,12 @@ NodeView::NodeView(NodeTableModel *model) : QTableView()
     connect(sendMsgAct, SIGNAL(triggered()), this, SLOT(configMsgDialog()));
 }
 
-NodeView::~NodeView()
+ReferTableView::~ReferTableView()
 {
 
 }
 
-void NodeView::configMsgDialog()
+void ReferTableView::configMsgDialog()
 {
     QModelIndexList indexList = selectedIndexes();
     int r = indexList.first().row();//获取在model中的行数，按照netId升序排序
@@ -84,7 +84,7 @@ void NodeView::configMsgDialog()
     referConfigDialog->show();
 }
 
-void NodeView::okToSend()
+void ReferTableView::okToSend()
 {
     int newFloor,newNumber,newPeriod;
     newFloor = floorEdit->text().toInt();

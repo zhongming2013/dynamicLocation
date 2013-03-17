@@ -21,14 +21,16 @@ SOURCES += main.cpp\
     node.cpp \
     mapscene.cpp \
     employeeform.cpp \
-    nodetablemodel.cpp \
     mobilenode.cpp \
     referencenode.cpp \
-    nodeview.cpp \
     employeeTableWidget.cpp \
     locationRecordForm.cpp \
     mobileTableModel.cpp \
-    mobileTableView.cpp
+    mobileTableView.cpp \
+    serialportdialog.cpp \
+    temperaturefrom.cpp \
+    refertablemodel.cpp \
+    refertableview.cpp
 
 HEADERS  += mainwindow.h \
     win_qextserialport.h \
@@ -39,15 +41,17 @@ HEADERS  += mainwindow.h \
     dbConnect.h \
     mapscene.h \
     employeeform.h \
-    nodetablemodel.h \
     mobilenode.h \
     referencenode.h \
-    nodeview.h \
     employeeTableWidget.h \
     define.h \
     locationRecordForm.h \
     mobileTableView.h \
-    mobileTableModel.h
+    mobileTableModel.h \
+    serialportdialog.h \
+    temperaturefrom.h \
+    refertableview.h \
+    refertablemodel.h
 
 RESOURCES += \
     images.qrc

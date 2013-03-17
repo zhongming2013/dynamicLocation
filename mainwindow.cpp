@@ -19,7 +19,7 @@
 #include "mobilenode.h"
 #include "define.h"
 #include "locationRecordForm.h"
-#include "room.h"
+#include "temperaturefrom.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -80,14 +80,17 @@ void MainWindow::createActions()
     closeComAct = new QAction(tr("Close COM"),this);
     closeComAct->setDisabled(true);
     closeComAct->setStatusTip(tr("Close the serial port"));
-    connect(closeComAct,SIGNAL(triggered()),this,SLOT(closeMyCom()));
+    connect(closeComAct,SIGNAL(triggered()),this,SLOT(closeCom()));
 
     findEmployeeAct = new QAction(tr("Employee..."),this);
     findEmployeeAct->setStatusTip(tr("Find an employee"));
-    connect(findEmployeeAct,SIGNAL(triggered()),this,SLOT(openFindEmployDialog()));
+    connect(findEmployeeAct,SIGNAL(triggered()),this,SLOT(findEmployee()));
     findLocationAct = new QAction(tr("Location History..."),this);
     findLocationAct->setStatusTip(tr("Look up the location history"));
     connect(findLocationAct,SIGNAL(triggered()),this,SLOT(findLocation()));
+    findTemperatureAct = new QAction(tr("Temperature History..."), this);
+    findTemperatureAct->setStatusTip(tr("Look up the temperature history"));
+    connect(findTemperatureAct, SIGNAL(triggered()), this, SLOT(findTemperature()));
 
     aboutAct = new QAction(tr("&About DL"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
@@ -113,6 +116,7 @@ void MainWindow::createMenus()
     findMenu = menuBar()->addMenu(tr("&Find"));
     findMenu->addAction(findEmployeeAct);
     findMenu->addAction(findLocationAct);
+    findMenu->addAction(findTemperatureAct);
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
@@ -150,11 +154,11 @@ void MainWindow::createDockWidgets()
     //设置参考节点信息停靠窗口
     dock=new QDockWidget(tr("Node Information"),this);
     dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    referenceNodeModel = new NodeTableModel;
-    referenceNodeView = new NodeView(referenceNodeModel);
-    connect(referenceNodeView, SIGNAL(sendConfigMsg(const QByteArray)),
-            this, SLOT(writeMyCom(const QByteArray)));
-    dock->setWidget(referenceNodeView);
+    referTableModel = new ReferTableModel;
+    referTableView = new ReferTableView(referTableModel);
+    connect(referTableView, SIGNAL(sendConfigMsg(const QByteArray)),
+            this, SLOT(writeCom(const QByteArray)));
+    dock->setWidget(referTableView);
     addDockWidget(Qt::RightDockWidgetArea,dock);
     viewMenu->addAction(dock->toggleViewAction());
     //移动节点配置信息停靠窗口
@@ -163,7 +167,7 @@ void MainWindow::createDockWidgets()
     mobileTableModel = new MobileTableModel;
     mobileTableView = new MobileTableView(mobileTableModel);
     connect(mobileTableView, SIGNAL(sendConfigMsg(const QByteArray)),
-            this, SLOT(writeMyCom(const QByteArray)));
+            this, SLOT(writeCom(const QByteArray)));
     dock->setWidget(mobileTableView);
     addDockWidget(Qt::RightDockWidgetArea,dock);
     viewMenu->addAction(dock->toggleViewAction());
@@ -189,79 +193,21 @@ void MainWindow::createDockWidgets()
 
 void MainWindow::openSerialPortDialog()
 {
-    serialPortDialog = new QDialog(this);
-
-    QLabel *comLabel = new QLabel(tr("Com:"));
-    QLabel *baudLabel = new QLabel(tr("Baud:"));
-    QLabel *dataLabel = new QLabel(tr("Data:"));
-    QLabel *parityLabel = new QLabel(tr("Parity:"));
-    QLabel *stopLabel = new QLabel(tr("Stop:"));
-
-    comComboBox = new QComboBox;
-    comComboBox->addItem(tr("COM1"));
-    comComboBox->addItem(tr("COM2"));
-    comComboBox->addItem(tr("COM3"));
-    comComboBox->addItem(tr("COM4"));
-    baudComboBox = new QComboBox;
-    baudComboBox->addItem(tr("9600"));
-    baudComboBox->addItem(tr("19200"));
-    baudComboBox->addItem(tr("38400"));
-    dataComboBox = new QComboBox;
-    dataComboBox->addItem(tr("8"));
-    dataComboBox->addItem(tr("7"));
-    parityComboBox = new QComboBox;
-    parityComboBox->addItem(tr("N"));
-    parityComboBox->addItem(tr("O"));
-    parityComboBox->addItem(tr("E"));
-    stopComboBox = new QComboBox;
-    stopComboBox->addItem(tr("1"));
-    stopComboBox->addItem(tr("2"));
-
-    QHBoxLayout *topHLayout = new QHBoxLayout;
-    QVBoxLayout *labelLayout = new QVBoxLayout;
-    QVBoxLayout *comboboxLayout = new QVBoxLayout;
-    labelLayout->addWidget(comLabel);
-    labelLayout->addWidget(baudLabel);
-    labelLayout->addWidget(dataLabel);
-    labelLayout->addWidget(parityLabel);
-    labelLayout->addWidget(stopLabel);
-    comboboxLayout->addWidget(comComboBox);
-    comboboxLayout->addWidget(baudComboBox);
-    comboboxLayout->addWidget(dataComboBox);
-    comboboxLayout->addWidget(parityComboBox);
-    comboboxLayout->addWidget(stopComboBox);
-    topHLayout->addLayout(labelLayout);
-    topHLayout->addLayout(comboboxLayout);
-
-    QPushButton *openPushButton = new QPushButton(tr("Open COM"));
-    QPushButton *cancelPushButton = new QPushButton(tr("Cancel"));
-    QHBoxLayout *bottomHLayout = new QHBoxLayout;
-    bottomHLayout->addWidget(cancelPushButton);
-    bottomHLayout->addWidget(openPushButton);
-    connect(openPushButton,SIGNAL(clicked()),this,SLOT(openMyCom()));
-    connect(cancelPushButton,SIGNAL(clicked()),serialPortDialog,SLOT(close()));
-
-    QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(topHLayout);
-    mainLayout->addLayout(bottomHLayout);
-
-    serialPortDialog->setLayout(mainLayout);
-    serialPortDialog->setMinimumSize(200,200);
-    serialPortDialog->setWindowTitle(tr("Config Serial Port"));
-
-    serialPortDialog->show();
+    comDialog = new SerialPortDialog(this);
+    connect(comDialog, SIGNAL(okToOpen()), this, SLOT(openCom()));
+    comDialog->show();
 }
 
-void MainWindow::openMyCom()
+void MainWindow::openCom()
 {
-    serialPortDialog->close();
+    comDialog->close();
 
-    QString portName = comComboBox->currentText();
+    QString portName = comDialog->getComName();
 
-    myCom = new Win_QextSerialPort(portName,QextSerialBase::EventDriven);
+    com = new Win_QextSerialPort(portName,QextSerialBase::EventDriven);
     //定义串口对象，并初始化
 
-    if(myCom->open(QIODevice::ReadWrite))
+    if(com->open(QIODevice::ReadWrite))
     {
         statusBar()->showMessage(tr("Open %1 successfully").arg(portName));
         closeComAct->setDisabled(false);
@@ -273,47 +219,48 @@ void MainWindow::openMyCom()
         return;
     }
     //以可读可写的方式打开
-    switch(baudComboBox->currentText().toInt())
+    switch(comDialog->getBaud())
     {
     case 9600:
-        myCom->setBaudRate(BAUD9600);
+        com->setBaudRate(BAUD9600);
         break;
     case 19200:
-        myCom->setBaudRate(BAUD19200);
+        com->setBaudRate(BAUD19200);
         break;
     case 38400:
-        myCom->setBaudRate(BAUD38400);
+        com->setBaudRate(BAUD38400);
         break;
     }
-    if(dataComboBox->currentText() == tr("8"))
-        myCom->setDataBits(DATA_8);
-    else if(dataComboBox->currentText() == tr("7"))
-        myCom->setDataBits(DATA_7);
-    if(parityComboBox->currentText() == tr("N"))
-        myCom->setParity(PAR_NONE);
-    if(stopComboBox->currentText() == tr("1"))
-        myCom->setStopBits(STOP_1);
-    myCom->setFlowControl(FLOW_OFF);
-    myCom->setTimeout(500);
+    if(comDialog->getData() == 8)
+        com->setDataBits(DATA_8);
+    else if(comDialog->getData() == 7)
+        com->setDataBits(DATA_7);
 
-    connect(myCom,SIGNAL(readyRead()),this,SLOT(readMyCom()));
+    if(comDialog->getParity() == "N")
+        com->setParity(PAR_NONE);
+
+    if(comDialog->getStop() == 1)
+        com->setStopBits(STOP_1);
+
+    com->setFlowControl(FLOW_OFF);
+    com->setTimeout(500);
+
+    connect(com,SIGNAL(readyRead()),this,SLOT(readCom()));
     //当串口缓冲区有数据时进行读操作
-
-    delete serialPortDialog;
 }
 
-void MainWindow::closeMyCom()
+void MainWindow::closeCom()
 {
-    myCom->close();
-    delete myCom;
+    com->close();
+    delete com;
     closeComAct->setDisabled(true);
     openComAct->setDisabled(false);
     statusBar()->showMessage(tr("Close serial port successfully"));
 }
 
-void MainWindow::readMyCom()
+void MainWindow::readCom()
 {
-    QByteArray temp = myCom->readAll();
+    QByteArray temp = com->readAll();
 
     //读串口中的所有数据
     if(!temp.isEmpty())
@@ -338,7 +285,7 @@ void MainWindow::readMyCom()
             view->getScene(incomeMsg.at(RT_ROOM_FLOOR))->doTemperatureMsg(incomeMsg);
             break;
         case REFER_CFG_MSG:
-            referenceNodeModel->refreshNodeTable(incomeMsg);
+            referTableModel->refreshReferTable(incomeMsg);
             break;
         default:
             break;
@@ -346,7 +293,7 @@ void MainWindow::readMyCom()
     }
 }
 
-void MainWindow::writeMyCom(const QByteArray array)
+void MainWindow::writeCom(const QByteArray array)
 {
     int type = array.at(MSG_TYPE) & 0xFF;
     int len = 0;
@@ -359,53 +306,36 @@ void MainWindow::writeMyCom(const QByteArray array)
         len = MOBILE_CFG_MSG_LEN;
         break;
     }
-    myCom->write(array.left(len));//bug!,总是返回-1，暂时没办法判断信息一定发送成功！！！！
+    com->write(array.left(len));//bug!,总是返回-1，暂时没办法判断信息一定发送成功！！！！
     sendTextBrowser->append(array.toHex());
     statusBar()->showMessage(tr("Send successfully!"));
 }
 
 void MainWindow::aboutDL()
 {
-    QMessageBox::about(this,tr("About Dynamic Location"),
-                       tr("<h2> Dynamic Location 2.0</h2>"
+    QMessageBox::about(this,tr("About Intelligent Building Regional Positioning"),
+                       tr("<h2>  Intelligent Building Regional Positioning 2.0</h2>"
                           "<p>Copyright &copy; zhongming 2012.11"
-                          "<p>The <b>Dynamic Location</b> show the location"
+                          "<p>The <b> Intelligent Building Regional Positioning</b> show the location"
                           "dynamicly.Also,it can config the reference node"
                           "and end-device node."));
 }
 
 
-void MainWindow::openFindEmployDialog()
+void MainWindow::findEmployee()
 {
     EmployeeForm *employee = new EmployeeForm(1,this);
     employee->show();
 }
 
-void MainWindow::openFindLocationDialog()
-{
-    locationRecordTableModel = new QSqlTableModel(this);
-    locationRecordTableModel->setTable("location");
-    locationRecordTableModel->setSort(0,Qt::AscendingOrder);
-    locationRecordTableModel->setHeaderData(1, Qt::Horizontal, tr("NetID"));
-    locationRecordTableModel->setHeaderData(2, Qt::Horizontal, tr("RoomID"));
-    locationRecordTableModel->setHeaderData(3, Qt::Horizontal, tr("Help"));
-    locationRecordTableModel->setHeaderData(4, Qt::Horizontal, tr("Time"));
-    locationRecordTableModel->select();
-    locationRecordTableView = new QTableView;//不能构造为this，否则无法弹出
-    locationRecordTableView->setModel(locationRecordTableModel);
-    locationRecordTableView->setColumnHidden(0, true);
-    locationRecordTableView->resizeColumnsToContents();
-    locationRecordTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    locationRecordTableView->show();
-}
-
-void MainWindow::findEmployee()
-{
-
-}
-
 void MainWindow::findLocation()
 {
     LocationRecordForm * form = new LocationRecordForm(this);
+    form->show();
+}
+
+void MainWindow::findTemperature()
+{
+    TemperatureFrom *form = new TemperatureFrom;
     form->show();
 }

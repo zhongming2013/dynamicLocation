@@ -1,4 +1,4 @@
-#include "nodetablemodel.h"
+#include "refertablemodel.h"
 #include "define.h"
 
 #include <QVector>
@@ -6,7 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-NodeTableModel::NodeTableModel(QObject *parent)
+ReferTableModel::ReferTableModel(QObject *parent)
 {
     setTable("referNode");
     setSort(1, Qt::AscendingOrder);
@@ -17,7 +17,7 @@ NodeTableModel::NodeTableModel(QObject *parent)
     select();
 }
 
-void NodeTableModel::refreshNodeTable(const QVector<int> referenceMsg)
+void ReferTableModel::refreshReferTable(const QVector<int> referenceMsg)
 {
     QString hexNetId;
     int floor,number;
